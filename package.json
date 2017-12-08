@@ -1,0 +1,38 @@
+{
+  "name": "surveillance-app",
+  "version": "1.0.0",
+  "description": "webrtc",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gcamon/surveillance-app.git"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "webrtc",
+    "socket.io"
+  ],
+  "author": "Ede Obinna",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gcamon/surveillance-app/issues"
+  },
+  "homepage": "https://github.com/gcamon/surveillance-app#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "connect-flash": "^0.1.1",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "mysql": "^2.15.0",
+    "node-uuid": "^1.4.8",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "record-entire-meeting": "^1.0.2",
+    "socket.io": "^2.0.4"
+  }
+}

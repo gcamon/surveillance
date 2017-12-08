@@ -1,0 +1,69 @@
+<main class="container-fluid" ng-controller='siteRemoteStreamsController as rtc' style="margin: 0;padding: 0">        
+            <header style="margin-bottom: 3px;background-color: #d9edf7;padding: 10px">
+            	
+            </header>
+            
+			<section class="row">
+				<div class="col-sm-12 col-md-10 col-lg-10" style="margin-top:-10px;padding: 0">
+					<div class="shadow" style="width: 98%;margin: 0 auto">
+						<h4 style="padding: 10px;background-color: orange;color: #fff">Remote Streams</h4>
+						<div id="remoteVideosContainer" style="margin-top: -10px;margin-left: 10px">
+							
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="col-sm-12 col-md-2 col-lg-2 shadow" style="padding: 0px 20px 0 5px;margin-top: -5px;">
+					<div>
+						<div style="padding:5px"> <a href ng-click="rtc.loadData()"><i class="fa fa-refresh"></i> Refresh</a></div>
+						<!--<video id="localVideo" muted="muted" autoplay="true" style="width: 100%;height:100%"></video>-->
+					</div>
+					<div style="max-height: 530px;overflow-y: auto">
+						<div ng-repeat="stream in rtc.remoteStreams" ng-class="{'selected' : stream.isPlaying}">
+			        		<h5>{{stream.name}}</h5>
+			                <button ng-click="rtc.view(stream)" class="btn btn-success">View</button>
+			                <!--<button ng-click="rtc.call(stream)"><a>Call</a></button>-->
+					    </div>	
+				    </div>
+
+					<!--<li ng-click="rtc.loadData()" style="width: 240px">
+				        
+				    </li>-->
+				</div>
+				<!--<div class="col-sm-12 col-md-4 col-lg-4">
+					<div style="width: 95%;height:300px" class="shadow">
+						<h6>Cam2</h6>
+					</div>
+				</div>
+				<div class="col-sm-12 col-md-4 col-lg-4">
+					<div style="width: 95%;height:300px" class="shadow">
+						<h6>Cam3</h6>
+					</div>
+				</div>
+				<div class="col-sm-12 col-md-4 col-lg-4">
+					<div style="width: 95%;height:300px" class="shadow">
+						<h6>Cam4</h6>
+					</div>
+				</div>-->
+				
+	    	</section>
+	    	
+
+<main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+	

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='rtcSurveillance'>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<meta name='keywords' content='WebRTC, HTML5, JavaScript' />
+		<meta name='description' content='WebRTC Video Conference App' />
+		<meta name='viewport' content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1'>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>	
+		<!--<script src='/js/home.js'></script>-->
+		<link rel="stylesheet" type="text/css" href="/assets/css/style.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/assets/libs/bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/assets/libs/bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="/assets/libs/bower_components/bootstrap/dist/js/bootstrap.min.js">
+		<title>WebRTC Surveillance</title>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="/assets/js/adapter.js"></script>
+		<script type="text/javascript" src="/assets/js/rtcClient.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js">
+		</script>
+		<script type="text/javascript" src="/assets/js/app.js"></script>
+		<script type="text/javascript" src="/assets/js/ngroute.js"></script>
+	</head>
+	<body>  
+        <main class="container">
+            <header style="margin: 50px 0"></header>
+			<section>
+				<div style="width: 50%; margin: auto auto">
+					<form class="form-group" method="POST" action="">
+						<div>
+							<label class="">User name: </label>
+							<input type="text" name="username" class="form-control">
+						</div>
+						<div>
+							<label class="">Password: </label>
+							<input type="text" name="password" class="form-control">
+						</div>
+						<div>
+							<p>Don't have an account? <a href="/signup"> Register</a></p>
+						</div>
+					</form>
+				</div>
+				<div>
+					<a href="/login" target="_blank"> Log in </a> or <a href="/signup"> Create Account</a>
+				</div>
+				<div>
+					<a href="/user/centeral-control/jkjustKidding" target="_blank">For now goto centeral viewing of sites</a>
+				</div>
+				<div>
+					<a href="/site/shjhjhfjhdf" target="_blank">For now got to a site</a>
+				</div>
+				
+	    	</section>
+        </main>                     
+	</body>
+</html>
