@@ -17,16 +17,17 @@ var PeerManager = (function (name) {
   peerDatabase = {},
   localStream,
   remoteVideoContainer = document.getElementById('remoteVideosContainer'),
+  localV = document.getElementById("localV"),
   socket;
   
   function initSocket() { 
     socket = io();
-    if(!localStream) { 
-      socket.on('message', handleMessage);
-      socket.on('id', function(id) {
-        localId = id;
-      });
-    }
+    
+    socket.on('message', handleMessage);
+    socket.on('id', function(id) {
+      localId = id;
+    });
+    
   }
   
   initSocket()
@@ -34,8 +35,7 @@ var PeerManager = (function (name) {
   //peer are kept. The remark where this happened in "jj".
   function addPeer(remoteId,name) {
     var peer = new Peer(config.peerConnectionConfig, config.peerConnectionConstraints, name);
-    console.log("checking out peer object")
-    console.log(peer)
+   
     peer.pc.onicecandidate = function(event) {
       if (event.candidate) {
         send('candidate', remoteId, {
@@ -60,7 +60,7 @@ var PeerManager = (function (name) {
       || event.target   ) // Firefox
       .iceConnectionState) {
         case 'disconnected':
-          remoteVideosContainer.removeChild(peer.remoteVideoEl);
+          //remoteVideoContainer.removeChild(peer.remoteVideoEl);
           break;
       }
     };
@@ -95,6 +95,7 @@ var PeerManager = (function (name) {
     var type = message.type,
         from = message.from,
         pc = (peerDatabase[from] || addPeer(from)).pc;
+        console.log(peerDatabase[from])
 
     console.log('received ' + type + ' from ' + from);
   
@@ -132,9 +133,10 @@ var PeerManager = (function (name) {
   }
 
   function toggleLocalStream(pc) {
-    if(localStream) {
+    if(localStream) {     
       (!!pc.getLocalStreams().length) ? pc.removeStream(localStream) : pc.addStream(localStream);
     }
+
   }
 
   function error(err){
@@ -154,14 +156,15 @@ var PeerManager = (function (name) {
         for(id in peerDatabase) {
           var pc = peerDatabase[id].pc;
           if(!!pc.getLocalStreams().length) {
-            pc.removeStream(stream);
+            pc.removeStream(localStream);
             offer(id);
           }
         }
-      } 
-      initSocket(); //init socket for every connected video devices.
-      localStream = stream;
-      
+      } else if(stream) {
+        initSocket(); //init socket for every connected video devices.       
+      }
+
+      localStream = stream;  
     }, 
 
     toggleLocalStream: function(remoteId) {
@@ -185,9 +188,12 @@ var PeerManager = (function (name) {
       });
     },
 
+    ResetCam: function(event,payload) {
+      socket.emit(event,payload);
+    },
+
     controlJoin: function(controlId) {
       socket.emit("control join",{control:controlId},function(data){
-        console.log(data.control + " created a room!")
       })
     },
    
@@ -223,16 +229,3 @@ var Peer = function (pcConfig, pcConstraints,name) {
 
 }
 
-/*
-innerContainer = document.createElement("div");
-      innerContainer.style.display = "inline-block";
-      innerContainer.style.marginLeft = "2px";
-      
-      placeholder.style.padding = "5px";
-      placeholder.style.backgroundColor = "rgba(0,0,0,0.4)";
-      placeholder.style.color = "#fff";
-      placeholder.style.textAlign = "center";
-      placeholder.innerHTML += client.constraintsList[count].camCount;
-      innerContainer.append(placeholder);     
-
-*/

@@ -7,12 +7,17 @@ module.exports = function(io, streams) {
     client.emit('id', client.id);
 
     client.on('message', function (details) {
+
       var otherClient = io.sockets.connected[details.to];
+      console.log(client.id + " sending init to : " + details.to)
 
       if (!otherClient) {
         return;
       }
+
+    
         delete details.to;
+      
         details.from = client.id;
         otherClient.emit('message', details);
     });
@@ -29,7 +34,6 @@ module.exports = function(io, streams) {
     })
 
     client.on('readyToStream', function(options,cb) {
-      console.log(client)
       console.log('-- ' + client.id + ' is ready to stream --');
       //search database to see which control this client belong to.
       streams.addStream(client.id, options.name, options.controlId);
@@ -39,7 +43,6 @@ module.exports = function(io, streams) {
     });
 
     client.on("init reload",function(data){
-    	console.log(data.message)
     	io.sockets.to(data.controlId).emit("reload streams",{status:true})
     })
     
@@ -47,9 +50,10 @@ module.exports = function(io, streams) {
       streams.update(client.id, options.name);
     });
 
-    function leave() {
+    function leave(data) {
       console.log('-- ' + client.id + ' left --');
       streams.removeStream(client.id);
+      io.sockets.to(data.controlId).emit("reload streams",{status:true})
     }
 
     client.on('disconnect', leave);

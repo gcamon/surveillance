@@ -8,7 +8,6 @@ var fs = require("fs");
 module.exports = function (db,streams) {
 
   router.get("/",function(req,res){
-  	console.log(req.headers)
     res.render('index');
   });
 

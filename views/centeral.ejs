@@ -19,8 +19,10 @@
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="/assets/js/adapter.js"></script>
 		<script type="text/javascript" src="/assets/js/rtcClient.js"></script>
+		
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js">
 		</script>
+		<script type="text/javascript" src="/assets/js/angular-source.js"></script>
 		<script type="text/javascript" src="/assets/js/app.js"></script>
 		<script type="text/javascript" src="/assets/js/ngroute.js"></script>
 		
@@ -43,7 +45,7 @@
 					    		</li>
 								<li ng-repeat="stream in rtc.remoteStreams">
 									<label style="color:#fff;padding-right: 20px">{{stream.name}}</label>
-			                		<button ng-click="rtc.view(stream)" class="btn btn-success">View Stream</button>
+			                		<button ng-click="rtc.view(stream)" class="btn btn-success">{{ stream.isPlaying || stream.isPlaying === true ? 'close stream' : 'view stream' }}</button>
 								</li>
 								<li>							
 									<video id="localVideo" muted="muted" autoplay="true" style="width: 100%;height:100%"></video>					

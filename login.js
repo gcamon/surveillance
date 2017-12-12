@@ -14,13 +14,11 @@ module.exports = function(db,streams) {
 			 db.escape(req.body.password) + " and user_name" + " = " + db.escape(req.body.user_name);
 			                    
       db.query(sql,function(err, results){
-      	console.log(results) 
        if(err) throw err;  
           
        if(results.length){
           req.session.userId = results[0]._id;
           req.session.user = results[0];
-          console.log(req.session);
           res.redirect("/control");
           //db.end();
        }

@@ -19,7 +19,7 @@ http.listen(port,function(){
 
 config.configuration(app);
 signupRoute(db);
-console.log("it happened")
+
 loginRoute(db,streams);
 route(db,streams); 
 mySocket(io,streams);

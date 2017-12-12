@@ -32,7 +32,7 @@ module.exports = function() {
       } else {
         this.addControl(controlId)
       }
-      console.log(stream)
+      
     },
 
     removeStream : function(id) {

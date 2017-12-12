@@ -4,8 +4,6 @@
     );
 
 	var client = new PeerManager(name);
-	console.log("")
-	console.log(client)
 	client.allsources = [];
 	/*var mediaConfig = {
         audio:true,
@@ -59,8 +57,8 @@
     	//Get the camera stream and attach to be passed onto a web element
     	camera.start = function(constraints){
 				return requestUserMedia(constraints)
-				.then(function(stream){
-				alert(stream)					
+				.then(function(stream){	
+				  alert(stream.id);			
 					console.log(stream.getTracks());			
 					//attachMediaStream(camera.preview, stream);
 					stream.name = constraints.name;
@@ -208,8 +206,7 @@
 	app.controller('RemoteStreamsController', ["$scope",'camera', '$location', '$http','$window', function($scope,camera, $location, $http, $window){
 		var rtc = this;
 		rtc.remoteStreams = [];
-		console.log("got devices connected to laptop");
-		console.log(client.allsources);
+		
 		rtc.allDevices = client.allsources;
 		function getStreamById(id) {
 		    for(var i=0; i<rtc.remoteStreams.length;i++) {
@@ -219,7 +216,7 @@
 		var control = {}
 
 		rtc.siteLink = function(controlId){
-			console.log(controlId)
+			
 			control.controlId = controlId;
 				//join a room
     	client.controlJoin(controlId);
@@ -241,7 +238,8 @@
 			    	streams[i].isPlaying = (!!stream) ? stream.isPLaying : false;
 			    }
 			    // save new streams
-			    console.log(streams)
+			  	
+			  	console.log(streams);
 			    rtc.remoteStreams = streams;
 			});
 		};
@@ -254,7 +252,13 @@
   		}
   	}
 
-		rtc.view = function(stream){
+  	$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
+  		if(newVal.length > 0) {
+  			rtc.view(newVal[newVal.length-1])
+  		}
+  	})
+
+		rtc.view = function(stream){ //here stream refers to sockets from the server not stream from cameras
 			client.peerInit(stream.id,stream.name);
 			stream.isPlaying = !stream.isPlaying;
 		};
@@ -395,10 +399,10 @@
 
 		localStream.stopCam = function(constraints) {			
 			localManager.removeItem("username");
+			client.ResetCam('leave',{ name: localStream.name,controlId: saveControlId.id });
 			camera.stop(constraints)
-			.then(function(result){
-				client.send('leave');
-    			client.setLocalStream(null);
+			.then(function(result){				
+				client.setLocalStream(null);
 			})
 			.catch(function(err) {
 				console.log(err);
