@@ -18,19 +18,19 @@ var PeerManager = (function (name) {
   localStream,
   remoteVideoContainer = document.getElementById('remoteVideosContainer'),
   localV = document.getElementById("localV"),
-  socket;
   
-  function initSocket() { 
-    socket = io();
-    
-    socket.on('message', handleMessage);
-    socket.on('id', function(id) {
-      localId = id;
-    });
-    
-  }
   
-  initSocket()
+ 
+  socket = io();
+  
+  socket.on('message', handleMessage);
+  socket.on('id', function(id) {
+    localId = id;
+  });
+    
+
+  
+ 
   //if peer does not exist yet, this function will create peer below otherwise peer will be retreived fron 'peerDatabase' where existin
   //peer are kept. The remark where this happened in "jj".
   function addPeer(remoteId,name) {
@@ -160,9 +160,7 @@ var PeerManager = (function (name) {
             offer(id);
           }
         }
-      } else if(stream) {
-        initSocket(); //init socket for every connected video devices.       
-      }
+      } 
 
       localStream = stream;  
     }, 
