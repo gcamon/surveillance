@@ -143,7 +143,7 @@
 			    // get former state
 			    for(var i=0; i<streams.length;i++) {
 			    	var stream = getStreamById(streams[i].id);
-			    	streams[i].isPlaying = (!!stream) ? stream.isPLaying : false;
+			    	streams[i].isPlaying = (!!stream) ? stream.isPlaying : false;
 			    }
 			    // save new streams
 			  	
@@ -160,11 +160,11 @@
   		}
   	}
 
-  	$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
+  	/*$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
   		if(newVal.length > 0) {
   			rtc.view(newVal[newVal.length-1])
   		}
-  	})
+  	})*/
 
 		rtc.view = function(stream){ //here stream refers to sockets from the server not stream from cameras
 			peer.peerInit(stream.id,stream.name);
