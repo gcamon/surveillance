@@ -29,13 +29,14 @@
 
 .aside-div {
 	text-align:center;
-	padding: 30px 0 0px 100px;
+	padding: 30px 0 0 20px;
 }
 
 .videoStreams {
 	list-style: none;
 	position: absolute;
 	top: 80px;
+	width: 800px;
 	right: 30px;
 	padding: 20px;
 	background-color: rgba(0,0,0,0.6);
@@ -43,12 +44,13 @@
 	color: #000;
 	z-index: 9999;
 	overflow-y: auto;
-	overflow-x:hidden;
+	overflow-x:auto;
 	max-height: 600px; 
 }
 
-.videoStreams li {
-	width: 500px;
+
+
+.videoStreams li {	
 	margin-bottom: 15px
 }
 

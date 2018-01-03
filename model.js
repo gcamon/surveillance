@@ -14,6 +14,18 @@ CREATE TABLE IF NOT EXISTS `controls4` (
   CONSTRAINT unique_id PRIMARY KEY (`id`)
 );
 
+CREATE TABLE IF NOT EXISTS `files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fieldname` text NOT NULL,
+  `originaname` varchar(100) NOT NULL,
+  `mimetype` varchar(100) NOT NULL,
+  `destination` varchar(100) NOT NULL,
+  `filename` varchar(100) NOT NULL,
+  `path` varchar(100) NOT NULL,
+  `url` varchar(100) NOT NULL,
+);
+
+
 */
 
 var mysql      = require('mysql');
@@ -29,10 +41,10 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err){
 	if(!err) {
-	    console.log("Database is connected ... nn");    
+	   console.log("Database is connected ... nn");    
 	} else {
 		console.log(err)
-	    console.log("Error connecting database ... nn"); 
+	   console.log("Error connecting database ... nn"); 
 	}
 });
 

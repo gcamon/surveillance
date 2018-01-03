@@ -6,8 +6,7 @@ var router = config.router;
 module.exports = function(db,streams) {	
 	router.post("/login",function(req,res){
 		var message = "";
-		if(req.method == 'POST'){
-			
+		if(req.method == 'POST'){		
 
 		
 			var sql = "SELECT * FROM controls4 WHERE password = " +

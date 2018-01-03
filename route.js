@@ -19,6 +19,21 @@ module.exports = function (db,streams) {
   	res.render("login",{message:""})
   });
 
+  router.post("/addrecord",function(req,res){
+  	console.log(req.body);
+
+  	db.query('INSERT INTO files SET ?', req.body, function(err, result) {	
+      if(err) throw err;
+	      if(result) {
+		      res.send({status: "success"})   
+	         //db.end();
+	      } else {
+	        res.end("error occured")
+	      }      
+      });  	
+  });
+
+ 
   router.get("/cam/:controlId",function(req,res){
   	var sql = "SELECT * FROM controls4 WHERE control_id = " +
 		db.escape(req.params.controlId);

@@ -1,13 +1,10 @@
+
 (function(){
 	var app = angular.module('rtcSurveillance', ["ngRoute"],
 		function($locationProvider){$locationProvider.html5Mode(true);}
     );
 
-	var client = {};
-	var peer;
-	var date;
-	var dateFilter;
-
+	var client = new PeerManager(name);
 	client.allsources = [];
 	/*var mediaConfig = {
         audio:true,
@@ -24,102 +21,15 @@
 	client.constraintsList = [];
 	client.camCount = 1;
 
-
-	var recorder;
-
-	function createPeer() {
-		peer = new PeerManager(name);		
-	}
-
-	function postFiles() {
-		var blob = recorder.getBlob();
-		console.log(blob)
-		var fileName = getRandomString() + "-" + client.getStreamName + ".webm"; //getRandomString()
-		console.log(fileName);
-
-		var file = new File([blob], fileName, {
-       type: 'video/webm'
-    });    
-
-    //send the file to local machine for storage;
-    xhr('http://localhost:4000/uploadFile', file, function(response) {
-     	saveRecord(response);
-    });
-	}
-
-	function saveRecord(data) {
-		/*xhr("/addrecord", response, function(feedback){
-   		consosle.log(response)
-   		alert("Recorded video stream saved!");
-   	})*/
-
-   	var request = new XMLHttpRequest();
-      request.onreadystatechange = function() {
-          if (request.readyState == 4 && request.status == 200) {
-              //callback(request.responseText);
-              console.log(request.responseText);
-          }
-      };
-              
-      /*request.upload.onprogress = function(event) {
-          progressBar.max = event.total;
-          progressBar.value = event.loaded;
-          progressBar.innerHTML = 'Upload Progress ' + Math.round(event.loaded / event.total * 100) + "%";
-      };
-              
-      request.upload.onload = function() {
-          percentage.style.display = 'none';
-          progressBar.style.display = 'none';
-      };*/
-      request.open('POST', "/addrecord");
-     
-      request.send(data);
-	}
-
-
-	function xhr(url, data, callback) {
-      var request = new XMLHttpRequest();
-      request.onreadystatechange = function() {
-          if (request.readyState == 4 && request.status == 200) {
-              callback(request.responseText);
-          }
-      };
-
-      /*var progressBar = document.getElementById("progressbar");
-
-			alert("yessssss");
-			console.log(progressBar);
-              
-      request.upload.onprogress = function(event) {
-          progressBar.max = event.total;
-          progressBar.value = event.loaded;
-          progressBar.innerHTML = 'Upload Progress ' + Math.round(event.loaded / event.total * 100) + "%";
-      };
-              
-      request.upload.onload = function() {
-          percentage.style.display = 'none';
-          progressBar.style.display = 'none';
-      };*/
-
-      request.open('POST', url);
-      var formData = new FormData();
-      formData.append('file', data);
-      request.send(formData);
-  }
-
-
-	function getRandomString() {
-		if (window.crypto) {
-        var a = window.crypto.getRandomValues(new Uint32Array(3)),
-          token = '';
-        for (var i = 0, l = a.length; i < l; i++) token += a[i].toString(36);
-        return token;
-    } else {
-        return (Math.random() * new Date().getTime()).toString(12).replace( /\./g , '');
-    }
-	}
+		
+    
 	//var audioSelect = document.getElementById("audioselect");
 		
+  
+
+	  
+
+
    /*navigator.mediaDevices.getUserMedia(mediaConfig)
     .then(function(stream){
     	console.log(stream.getTracks())
@@ -149,38 +59,16 @@
     	camera.start = function(constraints){
 				return requestUserMedia(constraints)
 				.then(function(stream){	
+				  alert(stream.id);			
 					console.log(stream.getTracks());			
 					//attachMediaStream(camera.preview, stream);
 					stream.name = constraints.name;
-					peer.setLocalStream(stream);
+					client.setLocalStream(stream);
 					camera[constraints.camCount] = stream;
-					
 					//$rootScope.$broadcast(constraints.camCount,true);
 				})
 				.catch(Error('Failed to get access to local media.'));
 		  };
-
-		  camera.record = function(constraints){
-		  	return requestUserMedia(constraints)
-				.then(function(stream){	
-					if(stream){
-						var options = {
-				      mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
-				      audioBitsPerSecond: 128000,
-				      videoBitsPerSecond: 128000,
-				      bitsPerSecond: 128000 // if this line is provided, skip above two
-				    };
-				    recorder = RecordRTC(stream, options);
-				    recorder.startRecording();
-					}
-				})
-				.catch(Error('Failed to get access to local media.'));
-		  };
-
-		  camera.stopRecord = function() {
-		  	recorder.stopRecording(postFiles);
-		  }
-
     	camera.stop = function(constraints){
     		return new Promise(function(resolve, reject){			
 				try {
@@ -189,11 +77,8 @@
 					var track =  camera[constraints.camCount].getTracks();
           for( var i = 0; i < track.length; i++ ){
 	          track[i].stop();
-	        }        
-
-	        
-					//camera.preview.src = '';
-					
+	        }
+					camera.preview.src = '';
 					resolve();
 				} catch(error) {
 					reject(error);
@@ -224,320 +109,7 @@
 		 });
 
 
-	 
-
-	app.controller('RemoteStreamsController', ["$scope",'camera', '$location', '$http','$window', function($scope,camera, $location, $http, $window){
-		var rtc = this;
-		rtc.remoteStreams = [];
-
-		createPeer();
-
-		rtc.allDevices = client.allsources;
-		function getStreamById(id) {
-		    for(var i=0; i<rtc.remoteStreams.length;i++) {
-		    	if (rtc.remoteStreams[i].id === id) {return rtc.remoteStreams[i];}
-		    }
-		}
-		var control = {}
-
-		rtc.siteLink = function(controlId){
-			
-			control.controlId = controlId;
-				//join a room
-    	peer.controlJoin(controlId);
-			return $window.location.host + "/cam/" + controlId;
-		}
-
-		rtc.loadData = function () {
-			// get list of streams from the server
-		
-
-			$http.get('/streams.json').success(function(data){
-				// filter own stream
-				var streams = data.filter(function(stream) {
-			      	return stream.id != peer.getId();
-			    });
-			    // get former state
-			    for(var i=0; i<streams.length;i++) {
-			    	var stream = getStreamById(streams[i].id);
-			    	streams[i].isPlaying = (!!stream) ? stream.isPlaying : false;
-			    }
-			    // save new streams
-			  	
-			  	console.log(streams);
-			    rtc.remoteStreams = streams;
-			});
-		};
-
-		rtc.availableStreams = function() {
-  		if(rtc.panel !== true) {
-  			rtc.panel = true;
-  		} else {
-  			rtc.panel = false;
-  		}
-  	}
-
-  	/*$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
-  		if(newVal.length > 0) {
-  			rtc.view(newVal[newVal.length-1])
-  		}
-  	})*/
-
-		rtc.view = function(stream){ //here stream refers to sockets from the server not stream from cameras
-			peer.peerInit(stream.id,stream.name);
-			stream.isPlaying = !stream.isPlaying;
-		};
-		rtc.call = function(stream){
-			/* If json isn't loaded yet, construct a new stream 
-			 * This happens when you load <serverUrl>/<socketId> : 
-			 * it calls socketId immediatly.
-			**/
-			if(!stream.id){
-				stream = {id: stream, isPlaying: false};
-				rtc.remoteStreams.push(stream);
-			}
-			if(camera.isOn){
-				peer.toggleLocalStream(stream.id);
-				if(stream.isPlaying){
-					peer.peerRenegociate(stream.id);
-				} else {
-					peer.peerInit(stream.id);
-				}
-				stream.isPlaying = !stream.isPlaying;
-			} else {
-				camera.start()
-				.then(function(result) {
-					peer.toggleLocalStream(stream.id);
-					if(stream.isPlaying){
-						peer.peerRenegociate(stream.id);
-					} else {
-						peer.peerInit(stream.id);
-					}
-					stream.isPlaying = !stream.isPlaying;
-				})
-				.catch(function(err) {
-					console.log(err);
-				});
-			}
-		};
-
-		//initial load
-		rtc.loadData();
-    	if($location.url() != '/'){
-      		rtc.call($location.url().slice(1));
-    	};
-
-
-    /*client.reloadFn(function () {
-    	rtc.loadData(); //automaticall call the refresh
-    });*/
-		var controllerSocket = peer.getSocketForController();
-
-    controllerSocket.on("reload streams",function(data){
-    	alert("reloading");
-    	rtc.loadData();
-    })
-	}]);
-
-	app.controller('LocalStreamController',['camera', '$scope', 'localManager','$window','$location', "$filter",
-		function(camera, $scope, localManager,$window, $location, $filter){
-		var localStream = this;
-		localStream.name = localManager.getValue("username") || 'Guest';
-		localStream.link = '';
-		localStream.cameraIsOn = false;
-
-		var saveControlId = {};
-		var path = $location.path();
-		var newPath = path + "/local-streams";
-		$scope.allLocalStreams = function() {
-			$location.path(newPath);
-		}
-
-		
-		
-		navigator.mediaDevices.enumerateDevices()
-  	.then(gotDevices).catch(handleError);
-
-  	function gotDevices(deviceInfos) {
-		 for (var i = 0; i < deviceInfos.length; ++i) {
-				var deviceInfo = deviceInfos[i];
-				
-				
-				/*if (deviceInfo.kind === 'audioinput') {
-				option.text = deviceInfo.label ||
-				'microphone ' + i;				
-				} else */
-				if (deviceInfo.kind === 'videoinput') {	
-				var option = {};
-				var camPosition = "cam" + client.camCount;
-				option.value = deviceInfo.deviceId;			
-				option.text = deviceInfo.label || 'camera ' + i;
-				option.position = camPosition ;
-				client.allsources.push(option);				
-				getStream({value:deviceInfo.deviceId,position: camPosition});
-				client.camCount++;
-				} else {
-				  console.log('Found one other kind of source/device: ', deviceInfo);
-				}
-				
-		 }
-  	}
-		$scope.$watch("localStream.device",function(newVal,oldVal){
-			//alert(newVal)
-			if(newVal){
-				var split = newVal.split("/");
-			 	getStream({value:split[0],position: split[1]});
-			}
-		})
-
-		/*$rootScope.$on("cameraIsOn",function(event,val){
-			$scope.$apply(function(){
-				localStream.cameraStreaming = val;
-			})
-		})*/
-
-		localStream.getControlId = function(id){
-			saveControlId.id = id;		
-		}
-
-		localStream.allDevices = client.allsources;
-
-		localStream.toggleCam = function(constraints){	
-			if(constraints.status === false) {
-				createPeer();		
-				camera.start(constraints)
-				.then(function(result) {
-					localStream.link = $window.location.host + '/' + peer.getId();
-					if(localManager.getValue("username") !== "Guest" || localManager.getValue("username") !== ""){
-						localManager.setValue("username",localStream.name);
-					}				
-					peer.send('readyToStream', { name: localStream.name,controlId: saveControlId.id });
-				})
-				.catch(function(err) {
-					console.log(err);
-				});
-				constraints.status = true;
-			} else {
-				localStream.stopCam(constraints);
-			}			
-		};
-
-		localStream.stopCam = function(constraints) {			
-			localManager.removeItem("username");
-			//peer.ResetCam('leave',{ name: localStream.name,controlId: saveControlId.id });
-			
-			camera.stop(constraints)
-			.then(function(result){			
-				peer.setLocalStream(null);
-			})
-			.catch(function(err) {
-				console.log(err);
-			});
-			constraints.status = false;
-		};
-
-	
-	  function getStream(cam) {
-	  	
-  		if (window.stream) {
-				window.stream.getTracks().forEach(function(track) {
-				track.stop();
-				});
-			}
-			if(cam) {
-			var constraints = {
-				audio: true,
-				video: {
-					deviceId: {exact: cam.value},
-					width: { max: 580 },
-    			height: { max: 580 }
-				},
-				camCount: cam.position,
-				status: false
-			};
-
-			
-			client.constraintsList.push(constraints);
-			//getusermedia for locally connected device. Note these streams is not being stream to a control.
-  		navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
-  		  
-			}
-  	}
-
-  	localStream.constraints = client.constraintsList; //show constraints on the view for input of camera name
-
-  	localStream.streamCam = function (constraints) {  	
-  		localStream.name = constraints.name || constraints.camCount; 
-  		localStream.toggleCam(constraints);
-  	}
-
-  	localStream.recordCam = function(constraints){
-  		if(!constraints.record || constraints.record === false) {
-  			localStream.name = constraints.name || constraints.camCount;
-  			camera.record(constraints);
-  			constraints.record = true;
-  		} else {
-  			var date = + new Date();
-				var dateFilter = $filter("date")(date,"mediumDate");
-				client.getStreamName = (constraints.name || constraints.camCount) + "-" + dateFilter.toString();
-  			camera.stopRecord();
-  			constraints.record = false;
-  		}
-  		
-  	}
-
-  	
-  	localStream.availableStreams = function() {
-  		if(localStream.panel !== true) {
-  			localStream.panel = true;
-  		} else {
-  			localStream.panel = false;
-  		}
-  	}
-  	
-
-  	var container = document.getElementById("localV");
-  	var innerContainer;
-  	var count = 0;
-  	function gotStream(stream) {
-  		console.log(stream)
-			window.stream = stream; // make stream available to console
-			//var videoElement.srcObject = stream;
-			//var innerContainer = document.createElement		
-			var videoElem = document.createElement('video');
-			videoElem.controls = true;
-			videoElem.autoplay = true;
-			var placeholder = document.createElement('p');		
-			innerContainer = document.createElement("div");
-			innerContainer.style.display = "inline-block";
-			innerContainer.style.marginLeft = "2px";
-			
-			placeholder.style.padding = "5px";
-			placeholder.style.backgroundColor = "rgba(0,0,0,0.4)";
-			placeholder.style.color = "#fff";
-			placeholder.style.textAlign = "center";
-			placeholder.innerHTML += client.constraintsList[count].camCount;
-			innerContainer.append(placeholder);			
-			attachMediaStream(videoElem,stream,innerContainer,container);
-			
-			
-			count++;
-
-			
-			//videoElem.srcObject = stream;
-			//container.appendChild(videoElem);
-		}
-
-		function handleError(error) {
-			console.log('Error: ', error);
-		}
-
-	}]);
-
-
-
-
-  //controller not in use
+	   //controller not in use
     app.controller("siteRemoteStreamsController",["$scope","camera","$location","$http","$window",function($scope,camera,$location,$http,$window){
     	var rtc = this;
 		rtc.remoteStreams = [];
@@ -631,5 +203,295 @@
     	rtc.loadData();
     })
   }]);
+
+	app.controller('RemoteStreamsController', ["$scope",'camera', '$location', '$http','$window', function($scope,camera, $location, $http, $window){
+		var rtc = this;
+		rtc.remoteStreams = [];
+		
+		rtc.allDevices = client.allsources;
+		function getStreamById(id) {
+		    for(var i=0; i<rtc.remoteStreams.length;i++) {
+		    	if (rtc.remoteStreams[i].id === id) {return rtc.remoteStreams[i];}
+		    }
+		}
+		var control = {}
+
+		rtc.siteLink = function(controlId){
+			
+			control.controlId = controlId;
+				//join a room
+    	client.controlJoin(controlId);
+			return $window.location.host + "/cam/" + controlId;
+		}
+
+		rtc.loadData = function () {
+			// get list of streams from the server
+		
+
+			$http.get('/streams.json').success(function(data){
+				// filter own stream
+				var streams = data.filter(function(stream) {
+			      	return stream.id != client.getId();
+			    });
+			    // get former state
+			    for(var i=0; i<streams.length;i++) {
+			    	var stream = getStreamById(streams[i].id);
+			    	streams[i].isPlaying = (!!stream) ? stream.isPLaying : false;
+			    }
+			    // save new streams
+			  	
+			  	console.log(streams);
+			    rtc.remoteStreams = streams;
+			});
+		};
+
+		rtc.availableStreams = function() {
+  		if(rtc.panel !== true) {
+  			rtc.panel = true;
+  		} else {
+  			rtc.panel = false;
+  		}
+  	}
+
+  	$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
+  		if(newVal.length > 0) {
+  			rtc.view(newVal[newVal.length-1])
+  		}
+  	})
+
+		rtc.view = function(stream){ //here stream refers to sockets from the server not stream from cameras
+			client.peerInit(stream.id,stream.name);
+			stream.isPlaying = !stream.isPlaying;
+		};
+		rtc.call = function(stream){
+			/* If json isn't loaded yet, construct a new stream 
+			 * This happens when you load <serverUrl>/<socketId> : 
+			 * it calls socketId immediatly.
+			**/
+			if(!stream.id){
+				stream = {id: stream, isPlaying: false};
+				rtc.remoteStreams.push(stream);
+			}
+			if(camera.isOn){
+				client.toggleLocalStream(stream.id);
+				if(stream.isPlaying){
+					client.peerRenegociate(stream.id);
+				} else {
+					client.peerInit(stream.id);
+				}
+				stream.isPlaying = !stream.isPlaying;
+			} else {
+				camera.start()
+				.then(function(result) {
+					client.toggleLocalStream(stream.id);
+					if(stream.isPlaying){
+						client.peerRenegociate(stream.id);
+					} else {
+						client.peerInit(stream.id);
+					}
+					stream.isPlaying = !stream.isPlaying;
+				})
+				.catch(function(err) {
+					console.log(err);
+				});
+			}
+		};
+
+		//initial load
+		rtc.loadData();
+    	if($location.url() != '/'){
+      		rtc.call($location.url().slice(1));
+    	};
+
+
+    /*client.reloadFn(function () {
+    	rtc.loadData(); //automaticall call the refresh
+    });*/
+		var controllerSocket = client.getSocketForController();
+
+    controllerSocket.on("reload streams",function(data){
+    	alert("reloading");
+    	rtc.loadData();
+    })
+	}]);
+
+	app.controller('LocalStreamController',['camera', '$scope', 'localManager','$window','$location', function(camera, $scope, localManager,$window, $location){
+		var localStream = this;
+		localStream.name = localManager.getValue("username") || 'Guest';
+		localStream.link = '';
+		localStream.cameraIsOn = false;
+
+		var saveControlId = {};
+		var path = $location.path();
+		var newPath = path + "/local-streams";
+		$scope.allLocalStreams = function() {
+			$location.path(newPath);
+		}
+
+		
+		
+		navigator.mediaDevices.enumerateDevices()
+  	.then(gotDevices).catch(handleError);
+
+  	function gotDevices(deviceInfos) {
+		 for (var i = 0; i < deviceInfos.length; ++i) {
+				var deviceInfo = deviceInfos[i];
+				
+				
+				/*if (deviceInfo.kind === 'audioinput') {
+				option.text = deviceInfo.label ||
+				'microphone ' + i;				
+				} else */
+				if (deviceInfo.kind === 'videoinput') {	
+				var option = {};
+				var camPosition = "cam" + client.camCount;
+				option.value = deviceInfo.deviceId;			
+				option.text = deviceInfo.label || 'camera ' + i;
+				option.position = camPosition ;
+				client.allsources.push(option);				
+				getStream({value:deviceInfo.deviceId,position: camPosition});
+				client.camCount++;
+				} else {
+				  console.log('Found one other kind of source/device: ', deviceInfo);
+				}
+				
+		 }
+  	}
+		$scope.$watch("localStream.device",function(newVal,oldVal){
+			//alert(newVal)
+			if(newVal){
+				var split = newVal.split("/");
+				console.log(split);
+			 	getStream({value:split[0],position: split[1]});
+			}
+		})
+
+		/*$rootScope.$on("cameraIsOn",function(event,val){
+			$scope.$apply(function(){
+				localStream.cameraStreaming = val;
+			})
+		})*/
+
+		localStream.getControlId = function(id){
+			console.log(id)
+			saveControlId.id = id;		
+		}
+
+		localStream.allDevices = client.allsources;
+
+		localStream.toggleCam = function(constraints){	
+			if(constraints.status === false) {		
+				camera.start(constraints)
+				.then(function(result) {
+					localStream.link = $window.location.host + '/' + client.getId();
+					if(localManager.getValue("username") !== "Guest" || localManager.getValue("username") !== ""){
+						localManager.setValue("username",localStream.name);
+					}				
+					client.send('readyToStream', { name: localStream.name,controlId: saveControlId.id });
+				})
+				.catch(function(err) {
+					console.log(err);
+				});
+				constraints.status = true;
+			} else {
+				localStream.stopCam(constraints)
+			}			
+		};
+
+		localStream.stopCam = function(constraints) {			
+			localManager.removeItem("username");
+			client.ResetCam('leave',{ name: localStream.name,controlId: saveControlId.id });
+			camera.stop(constraints)
+			.then(function(result){				
+				client.setLocalStream(null);
+			})
+			.catch(function(err) {
+				console.log(err);
+			});
+			constraints.status = false;
+		}
+
+	
+	  function getStream(cam) {
+	  	
+  		if (window.stream) {
+				window.stream.getTracks().forEach(function(track) {
+				track.stop();
+				});
+			}
+			if(cam) {
+			var constraints = {
+				audio: true,
+				video: {
+					deviceId: {exact: cam.value},
+					width: { max: 580 },
+    			height: { max: 580 }
+				},
+				camCount: cam.position,
+				status: false
+			};
+
+			
+			client.constraintsList.push(constraints);
+			//getusermedia for locally connected device. Note these streams is not being stream to a control.
+  		navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
+  		  
+			}
+  	}
+
+  	localStream.constraints = client.constraintsList; //show constraints on the view for input of camera name
+
+  	localStream.streamCam = function (constraints) {  	
+  		localStream.name = constraints.name || constraints.camCount; 
+  		localStream.toggleCam(constraints);
+  	}
+
+  	
+  	localStream.availableStreams = function() {
+  		if(localStream.panel !== true) {
+  			localStream.panel = true;
+  		} else {
+  			localStream.panel = false;
+  		}
+  	}
+  	
+
+  	var container = document.getElementById("localV");
+  	var innerContainer;
+  	var count = 0;
+  	function gotStream(stream) {
+  		console.log(stream)
+			window.stream = stream; // make stream available to console
+			//var videoElement.srcObject = stream;
+			//var innerContainer = document.createElement		
+			var videoElem = document.createElement('video');
+			videoElem.controls = true;
+			videoElem.autoplay = true;
+			var placeholder = document.createElement('p');		
+			innerContainer = document.createElement("div");
+			innerContainer.style.display = "inline-block";
+			innerContainer.style.marginLeft = "2px";
+			
+			placeholder.style.padding = "5px";
+			placeholder.style.backgroundColor = "rgba(0,0,0,0.4)";
+			placeholder.style.color = "#fff";
+			placeholder.style.textAlign = "center";
+			placeholder.innerHTML += client.constraintsList[count].camCount;
+			innerContainer.append(placeholder);			
+			attachMediaStream(videoElem,stream,innerContainer,container);
+			
+			
+			count++;
+
+			
+			//videoElem.srcObject = stream;
+			//container.appendChild(videoElem);
+		}
+
+		function handleError(error) {
+			console.log('Error: ', error);
+		}
+
+	}]);
 })();
 
