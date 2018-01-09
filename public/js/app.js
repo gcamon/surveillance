@@ -21,6 +21,42 @@
 	//var audioSelect = document.querySelector('select#audioSource');
 	//var videoSelect = document.querySelector('select#videoSource');
 
+	var allCameraStream = [];
+
+	function captureAllCameras(callback) {
+    var streams = [];
+    var donotDuplicateDevices = {};
+    DetectRTC.videoInputDevices.forEach(function(device, idx) {
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: {
+                mandatory: {},
+                optional: [{
+                    sourceId: device.id
+                }]
+            }
+        }).then(function(stream) {
+            if (!donotDuplicateDevices[device.id]) {
+                donotDuplicateDevices[device.id] = true;
+                // on-video-render:
+                // called as soon as this video stream is drawn (painted or recorded) on canvas2d surface
+                
+                streams.push(stream);
+            }
+            allCameraStreams.push(stream);
+
+            if (idx == DetectRTC.videoInputDevices.length - 1) {
+                callback(streams);
+            }
+        }).catch(function() {
+            console.error(arguments);
+        });
+    })
+}
+
+
+
+
 	client.constraintsList = [];
 	client.camCount = 1;
 
@@ -160,21 +196,18 @@
 				.catch(Error('Failed to get access to local media.'));
 		  };
 
-		  camera.record = function(constraints){
-		  	return requestUserMedia(constraints)
-				.then(function(stream){	
-					if(stream){
-						var options = {
-				      mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
-				      audioBitsPerSecond: 128000,
-				      videoBitsPerSecond: 128000,
-				      bitsPerSecond: 128000 // if this line is provided, skip above two
-				    };
-				    recorder = RecordRTC(stream, options);
-				    recorder.startRecording();
-					}
-				})
-				.catch(Error('Failed to get access to local media.'));
+		  camera.record = function(streams){	  
+				
+					var options = {
+			      mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
+			      audioBitsPerSecond: 128000,
+			      videoBitsPerSecond: 128000,
+			      bitsPerSecond: 128000 // if this line is provided, skip above two
+			    };
+			    recorder = RecordRTC(streams, options);
+			    recorder.startRecording();
+					
+				
 		  };
 
 		  camera.stopRecord = function() {
@@ -359,6 +392,8 @@
   	.then(gotDevices).catch(handleError);
 
   	function gotDevices(deviceInfos) {
+  		var streams = [];
+   
 		 for (var i = 0; i < deviceInfos.length; ++i) {
 				var deviceInfo = deviceInfos[i];
 				
@@ -471,17 +506,19 @@
   		localStream.toggleCam(constraints);
   	}
 
-  	localStream.recordCam = function(constraints){
-  		if(!constraints.record || constraints.record === false) {
-  			localStream.name = constraints.name || constraints.camCount;
-  			camera.record(constraints);
-  			constraints.record = true;
+  	localStream.isRecord = false;
+  	localStream.recordCam = function(constraints){  		
+  		if(localStream.isRecord === false) {
+  			//localStream.name = constraints.name || constraints.camCount;
+  			camera.record(allCameraStream);
+  			localStream.isRecord = true;
   		} else {
+  			var remark = localStream.remark || "Site";
   			var date = + new Date();
 				var dateFilter = $filter("date")(date,"mediumDate");
-				client.getStreamName = (constraints.name || constraints.camCount) + "-" + dateFilter.toString();
+				client.getStreamName = remark + "-" + dateFilter.toString();
   			camera.stopRecord();
-  			constraints.record = false;
+  			localStream.isRecord = false;
   		}
   		
   	}
@@ -499,6 +536,7 @@
   	var container = document.getElementById("localV");
   	var innerContainer;
   	var count = 0;
+
   	function gotStream(stream) {
   		console.log(stream)
 			window.stream = stream; // make stream available to console
@@ -522,7 +560,7 @@
 			
 			
 			count++;
-
+			allCameraStream.push(stream);
 			
 			//videoElem.srcObject = stream;
 			//container.appendChild(videoElem);
