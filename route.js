@@ -71,6 +71,7 @@ module.exports = function (db,streams) {
 				}
 		})
   });
+
   //control getting streams from sites they control.
   router.get('/streams.json',function(req,res){
 	   if(req.session.user) {
