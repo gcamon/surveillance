@@ -45,10 +45,9 @@ var PeerManager = (function (name) {
         });
       }
     };
-    //
     peer.pc.onaddstream = function(event) {
       attachMediaStream(peer.remoteVideoEl, event.stream);
-      remoteVideosContainer.appendChild(peer.innerDiv)
+      remoteVideosContainer.appendChild(peer.innerDiv);      
     };
     peer.pc.onremovestream = function(event) {
       peer.remoteVideoEl.src = '';
@@ -170,10 +169,11 @@ var PeerManager = (function (name) {
       toggleLocalStream(peer.pc);
     },
     
-    peerInit: function(remoteId,name) {
+    peerInit: function(remoteId,name,cb) {
       //set peer stream to remote id it belongs to or create a remote for it.
       peer = peerDatabase[remoteId] || addPeer(remoteId,name); //'jj'
       send('init', remoteId, null);
+      cb()
     },
 
     peerRenegociate: function(remoteId) {
@@ -197,6 +197,9 @@ var PeerManager = (function (name) {
    
     getSocketForController: function() {
       return socket;
+    },
+    removeButton : function(name,id) {
+      socket.emit('remove btn',{streamName: name,controlId: id})
     }
   };
   

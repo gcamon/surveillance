@@ -30,11 +30,9 @@ module.exports = function() {
       if(controls[controlId]) {
         controls[controlId].push(stream);
       } else {
-        this.addControl(controlId)
-      }
-      
+        this.addControl(controlId);
+      }      
     },
-
     removeStream : function(id) {
       var index = 0;
       while(index < streamList.length && streamList[index].id != id){
@@ -43,6 +41,15 @@ module.exports = function() {
       streamList.splice(index, 1);
     },
 
+    removeStreamByName : function(name,controlId) {
+      var index = 0;
+      console.log(controls[controlId]);
+      while(index < controls[controlId].length && controls[controlId][index].name !== name){
+        index++;
+      }
+      console.log(controls[controlId]);
+      controls[controlId].splice(index, 1);
+    },
     // update function
     update : function(id, name) {
       var stream = streamList.find(function(element, i, array) {
@@ -50,25 +57,19 @@ module.exports = function() {
       });
       stream.name = name;
     },
-
-    
-
     addControl: function(controlId){
       //check to see if control does not exist then add it 
       //do database search to find a control the requested site belongs to.
       //if control is found attach the control id to the controls object properties  
       if(!controls.hasOwnProperty(controlId)) {
         controls[controlId] = [];
-      }
-      
+      }      
     },
-
     getStreamToControl: function(controlId) { 
-      var controlStreamList = (controls.hasOwnProperty(controlId)) ? controls[controlId] : addControl(controlId);
+      var controlStreamList = (controls.hasOwnProperty(controlId)) ? controls[controlId] : this.addControl(controlId);
       if(controlStreamList) {
         return controlStreamList;
       }
     },
-
   }
 };

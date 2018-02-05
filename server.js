@@ -24,6 +24,3 @@ loginRoute(db,streams);
 route(db,streams); 
 mySocket(io,streams);
 
-
-      
-    

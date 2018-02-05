@@ -43,9 +43,9 @@
 					    		<li style="text-align: left"><i class="fa fa-times" ng-click="rtc.availableStreams()" style="color:#fff;font-size: 18px;padding:5px"></i>
 					    		<a href ng-click="rtc.loadData()" style="float:right;color:#fff;padding:5px"><i class="fa fa-refresh" ></i> Refresh</a>	
 					    		</li>
-								<li ng-repeat="stream in rtc.remoteStreams">
+								<li ng-repeat="stream in rtc.remoteStreams" id="{{stream.name}}">
 									<label style="color:#fff;padding-right: 20px">{{stream.name}}</label>
-			                		<button ng-click="rtc.view(stream)" class="btn btn-success">{{ stream.isPlaying || stream.isPlaying === true ? 'Streaming... ( close )' : 'view stream' }}</button>
+			                		<button ng-click="rtc.view(stream)" class="btn btn-success" >{{ stream.isPlaying || stream.isPlaying === true ? 'Streaming... ( close )' : 'view stream' }}</button>
 								</li>
 								<li>							
 									<video id="localVideo" muted="muted" autoplay="true" style="width: 100%;height:100%"></video>					

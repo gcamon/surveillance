@@ -50,11 +50,18 @@ module.exports = function(io, streams) {
       streams.update(client.id, options.name);
     });
 
+    client.on('remove btn',function(data){     
+      streams.removeStreamByName(data.streamName,data.controlId);
+      io.sockets.to(data.controlId).emit("update btn",{btnName: data.streamName})
+    })
+
     function leave(data) {
       console.log('-- ' + client.id + ' left --');
       streams.removeStream(client.id);
       io.sockets.to(data.controlId).emit("reload streams",{status:true})
     }
+
+
 
     client.on('disconnect', leave);
     client.on('leave', leave);

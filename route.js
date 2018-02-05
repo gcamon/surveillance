@@ -32,7 +32,6 @@ module.exports = function (db,streams) {
 	      }      
       });  	
   });
-
  
   router.get("/cam/:controlId",function(req,res){
   	var sql = "SELECT * FROM controls4 WHERE control_id = " +
@@ -71,8 +70,7 @@ module.exports = function (db,streams) {
 					res.send({status:"control does not exist."});
 				}
 		})
-  })
-
+  });
   //control getting streams from sites they control.
   router.get('/streams.json',function(req,res){
 	   if(req.session.user) {

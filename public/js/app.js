@@ -206,12 +206,22 @@
 			    };
 			    recorder = RecordRTC(streams, options);
 			    recorder.startRecording();
-					
+					client.isStartRec = false;
+					client.intervalId = setInterval(function() {
+						if(client.isStartRec) {
+							//alert("Saving recorded blobs...")						
+							recorder.stopRecording(postFiles);
+			        recorder.startRecording();
+					  } else {
+					  	client.isStartRec = true;
+					  }
+					},300000);
 				
 		  };
 
 		  camera.stopRecord = function() {
 		  	recorder.stopRecording(postFiles);
+		  	clearInterval(client.intervalId)
 		  }
 
     	camera.stop = function(constraints){
@@ -292,15 +302,26 @@
 			    });
 			    // get former state
 			    for(var i=0; i<streams.length;i++) {
+			    	console.log(streams)
 			    	var stream = getStreamById(streams[i].id);
-			    	streams[i].isPlaying = (!!stream) ? stream.isPlaying : false;
+			    	streams[i].isPlaying = (!!stream) ? stream.isPlaying : false;			    	
 			    }
 			    // save new streams
-			  	
-			  	console.log(streams);
-			    rtc.remoteStreams = streams;
+			  	rtc.remoteStreams = streams;
+			    rtc.view(rtc.remoteStreams[0],"auto")
 			});
+
+			
 		};
+
+		var streamObj = {};
+		streamObj.index = 1;
+		function openStream(stream) {
+			if(rtc.remoteStreams.length > streamObj.index)
+			  streamObj.index++
+			rtc.view(stream,"auto")
+		}
+
 
 		rtc.availableStreams = function() {
   		if(rtc.panel !== true) {
@@ -310,15 +331,16 @@
   		}
   	}
 
-  	/*$scope.$watch("rtc.remoteStreams",function(newVal,oldVal){
-  		if(newVal.length > 0) {
-  			rtc.view(newVal[newVal.length-1])
-  		}
-  	})*/
 
-		rtc.view = function(stream){ //here stream refers to sockets from the server not stream from cameras
-			peer.peerInit(stream.id,stream.name);
+		rtc.view = function(stream,arg){ //here stream refers to sockets from the server not stream from cameras
 			stream.isPlaying = !stream.isPlaying;
+			peer.peerInit(stream.id,stream.name,function(){
+				if(arg) {
+					openStream(rtc.remoteStreams[streamObj.index])
+				}
+				
+			});
+
 		};
 		rtc.call = function(stream){
 			/* If json isn't loaded yet, construct a new stream 
@@ -356,20 +378,27 @@
 
 		//initial load
 		rtc.loadData();
-    	if($location.url() != '/'){
-      		rtc.call($location.url().slice(1));
-    	};
+  	if($location.url() != '/'){
+    	rtc.call($location.url().slice(1));
+  	};
 
-
-    /*client.reloadFn(function () {
-    	rtc.loadData(); //automaticall call the refresh
-    });*/
 		var controllerSocket = peer.getSocketForController();
 
     controllerSocket.on("reload streams",function(data){
     	alert("reloading");
     	rtc.loadData();
-    })
+    });
+
+    controllerSocket.on("update btn",function(info) {
+    	var myEl = angular.element( document.querySelector( '#' + info.btnName ) );
+    	var elemPos = rtc.remoteStreams.map(function(x){return x.name}).indexOf();
+    	if(elemPos !== -1) {
+    		rtc.remoteStreams.splice(elemPos);
+    	}    	
+    	console.log(myEl)
+			myEl.remove();
+    });
+
 	}]);
 
 	app.controller('LocalStreamController',['camera', '$scope', 'localManager','$window','$location', "$filter",
@@ -457,13 +486,15 @@
 			}			
 		};
 
-		localStream.stopCam = function(constraints) {			
+		localStream.stopCam = function(constraints) {	
+		
 			localManager.removeItem("username");
 			//peer.ResetCam('leave',{ name: localStream.name,controlId: saveControlId.id });
 			
 			camera.stop(constraints)
 			.then(function(result){			
 				peer.setLocalStream(null);
+				peer.removeButton(constraints.name,saveControlId.id) //removes button on the control when stream is terminated
 			})
 			.catch(function(err) {
 				console.log(err);
@@ -472,8 +503,7 @@
 		};
 
 	
-	  function getStream(cam) {
-	  	
+	  function getStream(cam) {	  	
   		if (window.stream) {
 				window.stream.getTracks().forEach(function(track) {
 				track.stop();
@@ -507,16 +537,17 @@
   	}
 
   	localStream.isRecord = false;
-  	localStream.recordCam = function(constraints){  		
+  	localStream.recordCam = function(constraints){
+  		var remark = localStream.remark || "Site";
+			var date = + new Date();
+			var dateFilter = $filter("date")(date,"mediumDate");
+			client.getStreamName = remark + "-" + dateFilter.toString();  
+
   		if(localStream.isRecord === false) {
   			//localStream.name = constraints.name || constraints.camCount;
   			camera.record(allCameraStream);
   			localStream.isRecord = true;
-  		} else {
-  			var remark = localStream.remark || "Site";
-  			var date = + new Date();
-				var dateFilter = $filter("date")(date,"mediumDate");
-				client.getStreamName = remark + "-" + dateFilter.toString();
+  		} else {  			
   			camera.stopRecord();
   			localStream.isRecord = false;
   		}
@@ -538,7 +569,7 @@
   	var count = 0;
 
   	function gotStream(stream) {
-  		console.log(stream)
+  		
 			window.stream = stream; // make stream available to console
 			//var videoElement.srcObject = stream;
 			//var innerContainer = document.createElement		
@@ -604,13 +635,11 @@
 		    for(var i=0; i<streams.length;i++) {
 		    	var stream = getStreamById(streams[i].id);
 		    	streams[i].isPlaying = (!!stream) ? stream.isPLaying : false;
-		    	console.log(streams)
+		    	
 		    	/*if(!stream) {
 		    		streams.splice(i,1);
 		    	}*/
 		    }
-		    // save new streams
-		    console.log(streams);
 		    rtc.remoteStreams = streams;
 			});
 		};
@@ -665,7 +694,6 @@
     var controllerSocket = client.getSocketForController();
 
     controllerSocket.on("reload streams",function(data){
-    	alert("reloading")
     	rtc.loadData();
     })
   }]);
