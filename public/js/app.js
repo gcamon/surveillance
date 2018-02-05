@@ -308,7 +308,7 @@
 			    }
 			    // save new streams
 			  	rtc.remoteStreams = streams;
-			    //rtc.view(rtc.remoteStreams[0],"auto")
+			    rtc.view(rtc.remoteStreams[0],"auto")
 			});
 
 			
@@ -333,9 +333,13 @@
 
 
 		rtc.view = function(stream,arg){ //here stream refers to sockets from the server not stream from cameras
-			
-			peer.peerInit(stream.id,stream.name);
 			stream.isPlaying = !stream.isPlaying;
+			peer.peerInit(stream.id,stream.name,function(){
+				if(arg) {
+					openStream(rtc.remoteStreams[streamObj.index])
+				}
+				
+			});
 
 		};
 		rtc.call = function(stream){
@@ -373,7 +377,7 @@
 		};
 
 		//initial load
-		rtc.loadData();
+		//rtc.loadData();
   	if($location.url() != '/'){
     	rtc.call($location.url().slice(1));
   	};

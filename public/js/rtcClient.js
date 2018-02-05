@@ -18,9 +18,6 @@ var PeerManager = (function (name) {
   localStream,
   remoteVideoContainer = document.getElementById('remoteVideosContainer'),
   localV = document.getElementById("localV"),
-  
-  
- 
   socket = io();
   
   socket.on('message', handleMessage);

@@ -15,7 +15,7 @@
 		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
 		<title>WebRTC Surveillance</title>
 
-		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="/assets/js/adapter.js"></script>
 		<script type="text/javascript" src="/assets/js/rtcClient.js"></script>
 		<script src="https://cdn.webrtc-experiment.com/DetectRTC.js"> </script>
@@ -83,23 +83,6 @@
 				</div>
 			 	
 			 	
-				<!--<div class="col-sm-12 col-md-12 col-lg-12">
-					
-				    <div class="localStream" ng-controller="LocalStreamController as localStream">
-				    <button ng-click="allLocalStreams()">View streams</button>
-				    <p ng-cloak>{{localStream.getControlId('<%= details[0].control_id %>')}}</p>
-							<p><input ng-model="localStream.name"/></p>
-							<video id="localVideo" muted="muted" autoplay="true"></video>
-							<li ng-click="localStream.toggleCam()">
-								<a href>{{ localStream.cameraIsOn ? 'Stop' : 'Start' }}</a>
-							</li>
-							<div ng-show="localStream.cameraIsOn">		
-								<p></p>
-								<a>{{ localStream.link }}</a>
-							</div>
-					</div>
-					
-				</div>-->
 			</section>
 		</main>                     
 	</body>
