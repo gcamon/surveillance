@@ -40,14 +40,12 @@ module.exports = function() {
       }
       streamList.splice(index, 1);
     },
-
     removeStreamByName : function(name,controlId) {
       var index = 0;
       console.log(controls[controlId]);
       while(index < controls[controlId].length && controls[controlId][index].name !== name){
         index++;
       }
-      console.log(controls[controlId]);
       controls[controlId].splice(index, 1);
     },
     // update function
